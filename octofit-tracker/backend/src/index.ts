@@ -1,6 +1,7 @@
 import express from 'express'
 import dotenv from 'dotenv'
 import { connectDB } from './db/database'
+import { config } from './config/config'
 import usersRouter from './routes/users'
 import teamsRouter from './routes/teams'
 import activitiesRouter from './routes/activities'
@@ -8,12 +9,6 @@ import workoutsRouter from './routes/workouts'
 import leaderboardRouter from './routes/leaderboard'
 
 dotenv.config()
-
-const PORT = process.env.PORT ? Number(process.env.PORT) : 8000
-const CODESPACE_NAME = process.env.CODESPACE_NAME
-const API_URL = CODESPACE_NAME 
-  ? `https://${CODESPACE_NAME}-8000.app.github.dev`
-  : `http://localhost:${PORT}`
 
 async function main() {
   await connectDB()
@@ -23,7 +18,12 @@ async function main() {
 
   // Health check endpoint
   app.get('/api/health', (_req, res) => {
-    res.json({ status: 'ok', backendPort: PORT, apiUrl: API_URL })
+    res.json({ 
+      status: 'ok', 
+      backendPort: config.port, 
+      apiUrl: config.apiBaseUrl,
+      codespaceName: config.codespaceName || 'local'
+    })
   })
 
   // Route handlers
@@ -39,8 +39,13 @@ async function main() {
     res.status(500).json({ error: 'Internal server error' })
   })
 
-  app.listen(PORT, () => {
-    console.log(`OctoFit backend listening on ${API_URL}`)
+  app.listen(config.port, () => {
+    console.log(`OctoFit backend listening on ${config.apiBaseUrl}`)
+    if (config.codespaceName) {
+      console.log(`Codespace detected: ${config.codespaceName}`)
+    } else {
+      console.log('Running in localhost mode')
+    }
   })
 }
 
