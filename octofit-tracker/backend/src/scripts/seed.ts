@@ -1,9 +1,8 @@
 import mongoose from 'mongoose'
-const dotenv = require('dotenv')
+import dotenv from 'dotenv'
+import { connectDB, disconnectDB } from '../db/database'
 
 // Seed the octofit_db database with test data
-const MONGO_URI = 'mongodb://localhost:27017/octofit_db'
-
 dotenv.config()
 
 interface IUser {
@@ -67,8 +66,7 @@ const Workout = mongoose.model<IWorkout>('Workout', WorkoutSchema)
 
 async function seed() {
   try {
-    await mongoose.connect(MONGO_URI)
-    console.log('Connected to MongoDB (octofit_db)')
+    await connectDB()
 
     // Clear existing data
     await User.deleteMany({})
@@ -123,7 +121,7 @@ async function seed() {
     console.log(`Database: octofit_db`)
     console.log(`Collections populated: users, teams, activities, workouts`)
 
-    await mongoose.disconnect()
+    await disconnectDB()
   } catch (err) {
     console.error('Seeding error:', err)
     process.exit(1)

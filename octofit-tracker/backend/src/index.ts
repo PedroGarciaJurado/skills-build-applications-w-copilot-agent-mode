@@ -1,6 +1,6 @@
 import express from 'express'
-import mongoose from 'mongoose'
 import dotenv from 'dotenv'
+import { connectDB } from './db/database'
 import usersRouter from './routes/users'
 import teamsRouter from './routes/teams'
 import activitiesRouter from './routes/activities'
@@ -10,20 +10,13 @@ import leaderboardRouter from './routes/leaderboard'
 dotenv.config()
 
 const PORT = process.env.PORT ? Number(process.env.PORT) : 8000
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/octofit_db'
 const CODESPACE_NAME = process.env.CODESPACE_NAME
 const API_URL = CODESPACE_NAME 
   ? `https://${CODESPACE_NAME}-8000.app.github.dev`
   : `http://localhost:${PORT}`
 
 async function main() {
-  try {
-    await mongoose.connect(MONGO_URI)
-    console.log('Connected to MongoDB (octofit_db)')
-  } catch (err) {
-    console.error('MongoDB connection error:', err)
-    process.exit(1)
-  }
+  await connectDB()
 
   const app = express()
   app.use(express.json())
